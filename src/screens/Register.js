@@ -3,7 +3,46 @@ import { StyleSheet, Alert, Image, Text, View, FlatList, ActivityIndicator } fro
 import { Container, Drawer, Content, Header, Left, Body, Right, Button, Icon, Title, CardItem, Card, Item, Input, Thumbnail} from 'native-base';
 
 class Register extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      srcImg: '',
+      uri: '',
+      fileName: '',
+      loading: false
+    }
+  }
 
+  choosePicture = () => {
+    var ImagePicker = require('react-native-image-picker');
+    var options = {
+      title: 'Pilih Gambar',
+      storageOptions: {
+      skipBackup: true,
+      path: 'images'
+      }
+    }
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response =', response);
+      if(response.didCancel){
+        console.log('User cancelled image picker');
+      }
+      else if(response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      }
+      else if (response.customButton) {
+          console.log('User tapped custom button:', response.customButton);
+      }
+      else{
+      console.log(response.fileName);
+        this.setState({
+          srcImg: {uri:response.uri},
+          uri: response.uri,
+          fileName: response.fileName
+        })
+      }
+    })
+  }
 
   render() {
 
@@ -24,11 +63,14 @@ class Register extends Component {
           <CardItem>
           <Item style={styles.sizeItemm}>
             <Left>
-              <Text style={styles.txtlabel}>Foto</Text>
+            {(this.state.srcImg!='') ? (
+              <Thumbnail square large source={this.state.srcImg} />
+            ):(
+              <Button style={styles.btnUpload} onPress={this.choosePicture} >
+                <Text style={styles.txtUpload}>Upload Foto</Text>
+              </Button>
+            )}
             </Left>
-            <Button style={styles.btnUpload} >
-              <Text style={styles.txtUpload}>Upload</Text>
-            </Button>
           </Item >
           </CardItem>
           <Button style={styles.btnLogin} onPress={() => {this.props.navigation.navigate('ButtomNav')}}>
@@ -90,7 +132,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'grey',
     marginBottom: 20
-
   },
   txtUpload: {
     fontWeight: 'bold',

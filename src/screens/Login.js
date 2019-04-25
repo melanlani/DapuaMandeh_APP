@@ -1,11 +1,34 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, Image, Text, View, FlatList, ActivityIndicator,TouchableOpacity } from 'react-native';
-import { Container, Drawer, Content, Header, Left, Body, Right, Button, Icon, Title, CardItem, Card, Item, Input} from 'native-base';
+import { Container, Drawer, Content, Header, Left, Body, Right, Button, Icon, Title, CardItem, Card, Item, Input, Toast, Spinner} from 'native-base';
+import { connect } from 'react-redux';
+import { loginUser } from '../redux/actions/accounts';
 
 class Login extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: "",
+      password: "",
+      showToast: false
+    };
+  }
 
+  login = () => {
+    this.props.loginUserDispatch(this.state.email, this.state.password)
+    if (this.props.loading == false) {
+      Toast.show({
+        text: "Selamat Datang",
+        buttonText: "Okay",
+        duration: 1500,
+        type: "warning"
+      })
+      this.props.navigation.navigate('ButtomNav')
+    }
+  }
 
   render() {
+
 
     return (
 
@@ -13,13 +36,15 @@ class Login extends Component {
         <Content>
           <Image source={require('./assets/images.jpg')} style={styles.banner}/>
           <Item style={styles.sizeItem}>
-            <Input placeholder="Email"/>
+            <Input placeholder="Email" onChangeText={(email) => this.setState({email})}
+              value={this.state.email}/>
           </Item>
           <Item style={styles.sizeItem}>
-            <Input placeholder="Password" secureTextEntry={true}/>
+            <Input placeholder="Password" secureTextEntry={true} onChangeText={(password) => this.setState({password})}
+              value={this.state.password} />
           </Item>
-          <Button style={styles.btnLogin} onPress={() => {this.props.navigation.navigate('ButtomNav')}}>
-            <Text style={styles.txtlogin}>Login</Text>
+          <Button style={styles.btnLogin} onPress={() => this.login()}>
+            <Text style={styles.txtlogin}>Masuk</Text>
           </Button>
           <CardItem>
             <Left>
@@ -95,4 +120,18 @@ const styles = StyleSheet.create({
 
 });
 
-export default Login;
+const mapStateToProps = state => ({
+    loggedIn: state.accounts.loggedIn,
+    user: state.accounts.user,
+    loading: state.accounts.loading,
+})
+
+const mapDispatchToProps = dispatch => {
+  return {
+    loginUserDispatch: (email, password) => {
+    dispatch(loginUser(email, password))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

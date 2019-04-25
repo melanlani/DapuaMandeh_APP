@@ -1,11 +1,24 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, Image, Text, View, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Container, Thumbnail, Drawer, Content, Header, Left, Body, Icon, Right, Button, Title, CardItem, Card} from 'native-base';
+import { connect } from 'react-redux';
+import { getRecipe } from '../redux/actions/recipes';
 class Home extends Component {
 
+  componentDidMount(){
+    this.props.getRecipeDispatch()
+  }
 
   render() {
-
+    const { recipes, pending } = this.props;
+    if (pending) {
+      return(
+        <View style={styles.viewPending}>
+          <ActivityIndicator color="#E91E63" size="large"  />
+        </View>
+      )
+    }
+    else {
     return (
       <Container>
         <Header style={styles.header}>
@@ -26,78 +39,52 @@ class Home extends Component {
             <Text style={{fontWeight: 'bold'}}>Resep Terbaru</Text>
             </CardItem>
           </Card>
-          <TouchableOpacity onPress={() => {this.props.navigation.navigate('DetailRecipes')}}>
-          <Card>
-            <CardItem>
-              <Left>
-                <Thumbnail circle source={require('./assets/foto1.jpg')} />
-                <Body>
-                  <Text>Melani Putri U</Text>
-                </Body>
-              </Left>
-            </CardItem>
-            <CardItem cardBody>
-              <Image source={require('./assets/resep1.jpg')} style={{height: 200, width: null, flex: 1}}/>
-            </CardItem>
-            <CardItem>
-            <Text style={styles.txttitle}>Nissin Ramen Shitake Damuza</Text>
-            </CardItem>
-            <CardItem>
-            <Text >Nissin Ramen Shitake Damuza adalah ramen yang dimasak dengan cita rasa pedas asin dengan aroma khas jahe...</Text>
-            </CardItem>
-            <CardItem>
-              <Left>
-                <Button transparent>
-                  <Icon active name="thumbs-up" />
-                  <Text>12 Likes</Text>
-                </Button>
-              </Left>
-              <Body>
-              </Body>
-              <Right>
-                <Text>11h ago</Text>
-              </Right>
-            </CardItem>
-          </Card>
-          </TouchableOpacity>
+          <FlatList
+            data={recipes}
+            renderItem={({item}) =>(
+              <TouchableOpacity onPress={() => {this.props.navigation.navigate('DetailRecipes')}}>
+              <Card>
+                <CardItem>
+                  <Left>
+                    <Thumbnail circle source={{uri:item.foto}} />
+                    <Body>
+                      <Text>{item.username}</Text>
+                    </Body>
+                  </Left>
+                </CardItem>
+                <CardItem cardBody>
+                  <Image source={{uri: item.foto_resep}} style={{height: 200, width: null, flex: 1}}/>
+                </CardItem>
+                <CardItem>
+                <Text style={styles.txttitle}>{item.judul}</Text>
+                </CardItem>
+                <CardItem>
+                <Text >{item.bahan}</Text>
+                </CardItem>
+                <CardItem>
+                  <Left>
+                    <Button transparent>
+                      <Icon active name="thumbs-up" />
+                      <Text>12 Likes</Text>
+                    </Button>
+                  </Left>
+                  <Body>
+                  </Body>
+                  <Right>
+                    <Text>11h ago</Text>
+                  </Right>
+                </CardItem>
+              </Card>
+              </TouchableOpacity>
+            )}
+          keyExtractor={(item, index) => index.toString()}
+          />
 
-          <Card>
-            <CardItem>
-              <Left>
-                <Thumbnail circle source={require('./assets/foto.jpg')} />
-                <Body>
-                  <Text>Rina Rani</Text>
-                </Body>
-              </Left>
-            </CardItem>
-            <CardItem cardBody>
-              <Image source={require('./assets/resep2.jpg')} style={{height: 200, width: null, flex: 1}}/>
-            </CardItem>
-            <CardItem>
-            <Text style={styles.txttitle}>Pecel ayam ala ala mama</Text>
-            </CardItem>
-            <CardItem>
-              <Text>Pecel ayam ala ala mama adalah masakan yang dibuat dengan sepenuh hati dimana ayamnya direbus dalam...</Text>
-            </CardItem>
-            <CardItem>
-              <Left>
-                <Button transparent>
-                  <Icon active name="thumbs-up" />
-                  <Text>20 Likes</Text>
-                </Button>
-              </Left>
-              <Body>
-              </Body>
-              <Right>
-                <Text>11h ago</Text>
-              </Right>
-            </CardItem>
-          </Card>
         </Content>
       </Container>
 
       );
-
+    }
   }
 }
 const styles = StyleSheet.create({
@@ -125,7 +112,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#062e56'
   },
+  viewPending: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#E91E63'
+  },
 
 });
 
-export default Home;
+
+  const mapStateToProps = state => ({
+    recipes : state.recipes.recipes,
+    user: state.accounts.user
+  })
+
+  const mapDispatchToProps = dispatch => {
+    return {
+      getRecipeDispatch: () => {
+      dispatch(getRecipe())
+      }
+    }
+  }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

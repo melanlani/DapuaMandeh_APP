@@ -44,7 +44,6 @@ class InputRecipes extends Component {
     })
   }
 
-
   render() {
 
     return (
@@ -59,12 +58,18 @@ class InputRecipes extends Component {
         </Header>
       <Content>
         <Card>
+        <CardItem>
+          <TouchableOpacity onPress={this.choosePicture} >
+            <Icon name="camera" style={styles.iconPosition}/>
+            <Text style={{marginLeft:100, marginTop:8}}>Ketuk untuk upload</Text>
+          </TouchableOpacity>
+        </CardItem>
+        {(this.state.srcImg!='') && (
           <CardItem>
-            <TouchableOpacity onPress={this.choosePicture} >
-              <Icon name="camera" style={styles.iconPosition}/>
-              <Text style={{marginLeft:100, marginTop:8}}>Ketuk untuk upload</Text>
-            </TouchableOpacity>
-          </CardItem>
+              <Image source={this.state.srcImg}
+              style={{height: 200, width: null, flex: 1}}/>
+          </CardItem>    
+        )}
         </Card>
 
         <Card>

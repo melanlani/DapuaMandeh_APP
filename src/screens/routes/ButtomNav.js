@@ -8,14 +8,14 @@ import Profile from '../Profile'
 
 export const ButtomNav = createBottomTabNavigator({
 
-  Home: {
+  Beranda: {
     screen: Home,
     navigationOptions: {
       tabBarIcon: <Icon name="home" style={{ color: "#f76710"}}/>
     }
   },
 
-  InputRecipes: {
+  Resep: {
     screen: InputRecipes,
     navigationOptions: {
       tabBarIcon: <Icon name="plus-circle" type="FontAwesome" style={{ color: "#f76710"}}/>

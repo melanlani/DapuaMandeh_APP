@@ -1,11 +1,55 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, Image, Text, View, FlatList, ActivityIndicator } from 'react-native';
 import { Container, Drawer, Content, Header, Left, Body, Right, Button, Icon, Title, CardItem, Card, Thumbnail} from 'native-base';
-
+import { getData, removeData } from './storage';
+import { connect } from 'react-redux';
+import { getUserData, dropUser } from '../redux/actions/accounts';
 class Profile extends Component {
 
+  componentDidMount() {
+
+    this.props.navigation.addListener('didFocus', () => {
+      if (this.props.LoggedIn === false) {
+          this.props.navigation.navigate('Login')
+      }
+      else {
+          this.checkToken();
+      }
+    })
+  }
+
+  checkToken = async () => {
+      const token = await getData('token')
+      if (token) {
+          this.props.getUserDataDispatch(token);
+      }
+  }
+
+  logout() {
+    Alert.alert(
+        'Apakah yakin ingin keluar?',
+        '',
+        [
+          {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'batal',
+          },
+          { text: 'iya', onPress: () =>
+            {
+              this.props.dropUserDispatch()
+              removeData('token')
+              this.props.navigation.navigate('Login')
+            }
+          },
+        ],
+      { cancelable: false },
+    );
+  }
 
   render() {
+
+    const { id, username, email, foto } = this.props.user
 
     return (
       <Container>
@@ -24,15 +68,15 @@ class Profile extends Component {
             </CardItem>
             <CardItem >
               <Left>
-                  <Thumbnail circle large source={require('./assets/foto1.jpg')} />
-                <Body>
-                  <Text style={styles.txtname}>Melani P.U</Text>
-                  <Text>melanlani@yahoo.com</Text>
-                </Body>
+                <Thumbnail circle large source={{ uri: foto }} />
               </Left>
+              <Body>
+                <Text style={styles.txtname}>{username}</Text>
+                <Text style={styles.txtemail}>{email}</Text>
+              </Body>
               <Right>
-                <Button style={{backgroundColor: '#f76710', width:50, height:40}}>
-                  <Text style={styles.txtlogout}>Logout</Text>
+                <Button style={styles.btnLogout} onPress={() => this.logout()}>
+                  <Text style={styles.txtlogout}>Keluar</Text>
                 </Button>
               </Right>
             </CardItem>
@@ -91,6 +135,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#062e56'
   },
+  txtemail:{
+    fontSize: 10
+  },
   txttitle:{
     fontWeight: 'bold',
     fontSize: 20,
@@ -115,8 +162,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'white',
     marginLeft: 4
+  },
+  btnLogout: {
+    backgroundColor: '#f76710',
+    width:49,
+    height:40,
+    marginBottom: 35
   }
 
 });
 
-export default Profile;
+const mapStateToProps = state => ({
+  loggedIn: state.accounts.isLoggedIn,
+  user: state.accounts.user,
+  token: state.accounts.access_token
+})
+
+const mapDispatchToProps = dispatch => {
+  return {
+    getUserDataDispatch: (token) => {
+      dispatch(getUserData(token))
+    },
+    dropUserDispatch: () => {
+      dispatch(dropUser())
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);
